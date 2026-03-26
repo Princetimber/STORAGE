@@ -4,7 +4,7 @@ Universal context for AI agents (Cursor, Copilot, Claude, etc.) working in this 
 
 ## Project
 
-**{{MODULE_NAME}}** — a PowerShell module built with the [Sampler](https://github.com/gaelcolas/Sampler) framework.
+**Invoke-Storage** — a PowerShell module built with the [Sampler](https://github.com/gaelcolas/Sampler) framework.
 Target runtime: **PowerShell 7.0+**.
 
 ## Build / Test / Lint
@@ -21,8 +21,8 @@ Target runtime: **PowerShell 7.0+**.
 # or directly:
 Invoke-Pester
 
-# Lint
-Invoke-ScriptAnalyzer -Path source/ -Recurse
+# Lint (uses PSScriptAnalyzerSettings.psd1 to suppress cross-platform noise)
+Invoke-ScriptAnalyzer -Path source/ -Recurse -Settings PSScriptAnalyzerSettings.psd1
 
 # Package
 ./build.ps1 -tasks pack
@@ -39,8 +39,8 @@ source/
   Public/           # Exported functions (one per file)
   Private/          # Internal helpers (one per file)
   en-US/            # Help files
-  TemplateModule.psm1   # Root module (dot-sources Public/ and Private/)
-  TemplateModule.psd1   # Module manifest
+  Invoke-Storage.psm1   # Root module (dot-sources Public/ and Private/)
+  Invoke-Storage.psd1   # Module manifest
 tests/
   QA/               # ScriptAnalyzer compliance, changelog, help quality
     module.tests.ps1
@@ -57,7 +57,8 @@ tests/
 - Always use `[CmdletBinding()]` on advanced functions.
 - `SupportsShouldProcess` **only** on state-changing operations (`Set-`, `New-`, `Remove-`, `Export-`).
   Read-only functions (`Get-`, `Test-`, `Find-`) must **never** use `ShouldProcess`.
-- Every public function requires comment-based help: `.SYNOPSIS`, `.DESCRIPTION`, `.PARAMETER`, `.EXAMPLE`.
+- Every **public** function requires comment-based help: `.SYNOPSIS`, `.DESCRIPTION`, `.PARAMETER`, `.EXAMPLE`.
+- **Private** functions must use inline comments only — no comment-based help (CBH). Private functions are never exported and `Get-Help` cannot surface them; CBH adds ceremony without benefit.
 - Input validation is mandatory: `ValidateNotNullOrEmpty`, `ValidateSet`, `ValidatePattern`.
 
 ### Naming
@@ -104,7 +105,7 @@ tests/
 #Requires -Version 7.0
 
 BeforeAll {
-    $script:dscModuleName = 'TemplateModule'
+    $script:dscModuleName = 'Invoke-Storage'
     Import-Module -Name $script:dscModuleName
 }
 
