@@ -1,0 +1,129 @@
+TOPIC
+    about_Invoke-Storage
+
+SHORT DESCRIPTION
+    Automates the full lifecycle of Windows Server Storage Spaces resources for
+    enterprise workloads.
+
+LONG DESCRIPTION
+    The Invoke-Storage module provisions and removes a complete Windows Server
+    Storage Spaces stack — storage pool, virtual disk, GPT volume, NTFS label,
+    and workload-specific directories and marker files — in a single command.
+
+    Supported workloads:
+
+        SYSVOL           Active Directory SYSVOL share
+        NTDS             Active Directory database and logs
+        ConfigMgrInstall Configuration Manager installation drive
+        ApplicationSources Application source files (SCCM-excluded)
+        ContentLibrary   SCCM content library (SCCM-excluded)
+        SQL_MDF          SQL Server database files
+        SQL_LDF          SQL Server transaction log files
+        TempDB           SQL Server TempDB
+        WSUSDB           Windows Server Update Services database
+        Generic          Raw volume with no post-create artifacts
+
+    Key capabilities:
+
+        - Idempotent: checks for existing resources before creating them.
+        - Safe by default: ConfirmImpact=High on all destructive operations.
+        - WhatIf support: preview changes without modifying the system.
+        - Preflight validation: checks OS version, admin rights, and disk
+          availability before any storage operation.
+        - Cross-platform unit tests: all Windows-only cmdlets are mockable
+          on macOS and Linux for CI/CD pipelines.
+        - Thread-safe structured logging via Write-ToLog with auto-rotation,
+          sensitive data redaction, and ANSI colour console output.
+
+COMMANDS
+    Invoke-Storage
+        Creates or removes a Storage Spaces stack for a named workload.
+        Requires Windows Server and local Administrator privileges.
+
+        Parameters:
+            -StoragePoolName       Friendly name for the storage pool
+            -VirtualHardDiskName   Friendly name for the virtual disk
+            -Workload              Workload profile name (see list above)
+            -FileSystemLabel       NTFS volume label (defaults to workload name)
+            -ResiliencySettingName   Simple | Mirror | Parity (default: Simple)
+            -ProvisioningType      Fixed | Thin (default: Thin)
+            -SizeInGB              Disk size in gigabytes
+            -UseMaximumSize        Use all available pool space
+            -Remove                Remove resources instead of creating
+            -NoPostCreateArtifacts   Skip directories and marker files
+            -PassThru              Return a rich result object
+            -Force                 Suppress all confirmation prompts
+            -WhatIf                Preview without making changes
+
+        Outputs:
+            [char]          Drive letter of the created volume (default)
+            PSCustomObject  DriveLetter, StoragePool, VirtualDisk,
+                            Volume, Capacity (when -PassThru is used)
+
+EXAMPLES
+    EXAMPLE 1 — Create an NTDS volume
+
+        Invoke-Storage -StoragePoolName 'ADPool' `
+                       -VirtualHardDiskName 'NTDS_VDisk' `
+                       -Workload NTDS `
+                       -SizeInGB 100
+
+    EXAMPLE 2 — Mirror resiliency using all available space
+
+        Invoke-Storage -StoragePoolName 'ADPool' `
+                       -VirtualHardDiskName 'SYSVOL_VDisk' `
+                       -Workload SYSVOL `
+                       -ResiliencySettingName Mirror `
+                       -UseMaximumSize `
+                       -Confirm:$false
+
+    EXAMPLE 3 — SQL Server MDF volume with fixed provisioning
+
+        Invoke-Storage -StoragePoolName 'SQLPool' `
+                       -VirtualHardDiskName 'SQL_MDF_VDisk' `
+                       -Workload SQL_MDF `
+                       -SizeInGB 500 `
+                       -ProvisioningType Fixed
+
+    EXAMPLE 4 — Preview changes without making them
+
+        Invoke-Storage -StoragePoolName 'TestPool' `
+                       -VirtualHardDiskName 'Test_VDisk' `
+                       -Workload Generic `
+                       -SizeInGB 50 `
+                       -WhatIf
+
+    EXAMPLE 5 — Capture full resource details with -PassThru
+
+        $storage = Invoke-Storage -StoragePoolName 'Pool1' `
+                                  -VirtualHardDiskName 'VDisk1' `
+                                  -Workload SQL_MDF `
+                                  -SizeInGB 500 `
+                                  -PassThru `
+                                  -Confirm:$false
+
+        Write-Host "Drive:   $($storage.DriveLetter):"
+        Write-Host "Pool:    $($storage.StoragePool.FriendlyName)"
+        Write-Host "Usable:  $($storage.Capacity.UsableGB) GB"
+
+    EXAMPLE 6 — Remove all resources for a workload
+
+        Invoke-Storage -StoragePoolName 'ADPool' `
+                       -VirtualHardDiskName 'NTDS_VDisk' `
+                       -Workload NTDS `
+                       -Remove `
+                       -Confirm:$false
+
+NOTES
+    Requires PowerShell 7.0 or later and Windows Server (ProductType 3).
+    Run as Local Administrator.
+
+    Log file location is controlled by Set-LogFilePath. Default path is set
+    in the module manifest. Use Get-LogFilePath to inspect the current value.
+
+SEE ALSO
+    Write-ToLog
+    Set-LogFilePath
+    Get-LogFilePath
+    Clear-LogFile
+    https://learn.microsoft.com/en-us/windows-server/storage/storage-spaces/overview

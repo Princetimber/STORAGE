@@ -35,10 +35,10 @@ After cloning, run `Initialize-Template.ps1` to customize the template with your
 ## Module Structure (Sampler Layout)
 
 ```
-{{MODULE_NAME}}/
+Invoke-Storage/
 ├── source/
-│   ├── {{MODULE_NAME}}.psd1      # Module manifest
-│   ├── {{MODULE_NAME}}.psm1      # Dot-sources Public/ and Private/
+│   ├── Invoke-Storage.psd1      # Module manifest
+│   ├── Invoke-Storage.psm1      # Dot-sources Public/ and Private/
 │   ├── Public/                   # Exported functions (one per file)
 │   ├── Private/                  # Internal helper functions (one per file)
 │   └── en-US/                    # Help files
@@ -67,8 +67,8 @@ After cloning, run `Initialize-Template.ps1` to customize the template with your
 # or directly:
 Invoke-Pester
 
-# Lint
-Invoke-ScriptAnalyzer -Path source/ -Recurse
+# Lint (uses PSScriptAnalyzerSettings.psd1 to suppress cross-platform noise)
+Invoke-ScriptAnalyzer -Path source/ -Recurse -Settings PSScriptAnalyzerSettings.psd1
 
 # Package
 ./build.ps1 -tasks pack
@@ -79,7 +79,7 @@ Invoke-ScriptAnalyzer -Path source/ -Recurse
 - **One function per file**, filename matches function name exactly (e.g., `Get-Greeting.ps1`)
 - **Advanced functions**: always use `[CmdletBinding()]`
 - **SupportsShouldProcess**: required for state-changing operations only (Set-, New-, Remove-, Export-). Never on read-only functions (Get-, Test-, Find-)
-- **Comment-based help**: `.SYNOPSIS`, `.DESCRIPTION`, `.PARAMETER`, `.EXAMPLE` on all public functions
+- **Comment-based help**: `.SYNOPSIS`, `.DESCRIPTION`, `.PARAMETER`, `.EXAMPLE` on all **public** functions only. Private functions use inline comments — never CBH.
 - **Input validation**: mandatory — use `ValidateSet`, `ValidatePattern`, `ValidateNotNullOrEmpty`
 - **Error handling**: `try/catch/finally`, throw actionable errors, never swallow exceptions
 - **Naming**: PascalCase for functions (approved Verb-Noun), PascalCase for parameters, camelCase for local variables
@@ -133,7 +133,7 @@ Invoke-ScriptAnalyzer -Path source/ -Recurse
 
 4. **Validate**
    - Run lint and tests:
-     - `Invoke-ScriptAnalyzer -Path source/ -Recurse`
+     - `Invoke-ScriptAnalyzer -Path source/ -Recurse -Settings PSScriptAnalyzerSettings.psd1`
      - `Invoke-Pester`
    - If integration tests exist, they must be opt-in and clearly labeled
 

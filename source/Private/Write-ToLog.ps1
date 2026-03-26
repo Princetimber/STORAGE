@@ -3,7 +3,7 @@
 # Timestamp format used for log file names and archives (shared with Clear-LogFile)
 $script:LogTimestampFormat = 'yyyyMMdd_HHmmss'
 
-# Thread-safe, auto-rotating logger for Invoke-ADDSDomainController.
+# Thread-safe, auto-rotating logger for Invoke-Storage.
 # Entry point: Write-ToLog. Levels: INFO, DEBUG, WARN, ERROR, SUCCESS.
 
 # ============================================================================
@@ -21,7 +21,7 @@ function Initialize-LogFilePath {
     param()
 
     if (-not $Global:LogFile) {
-        $Global:LogFile = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), "Invoke-ADDSDomainController_$([System.DateTimeOffset]::UtcNow.ToString($script:LogTimestampFormat)).log")
+        $Global:LogFile = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), "Invoke-Storage_$([System.DateTimeOffset]::UtcNow.ToString($script:LogTimestampFormat)).log")
     }
     return $Global:LogFile
 }
@@ -114,7 +114,7 @@ function Write-ToLog {
 
         # Initialize mutex for thread safety (reuse existing if available)
         if (-not $script:LogMutex) {
-            $script:LogMutex = [System.Threading.Mutex]::new($false, 'Global\Invoke-ADDSDomainControllerLog')
+            $script:LogMutex = [System.Threading.Mutex]::new($false, 'Global\Invoke-StorageLog')
         }
     }
 
