@@ -30,6 +30,9 @@ BeforeAll {
     function global:New-Partition {
         param([int]$DiskNumber, [switch]$UseMaximumSize, [switch]$AssignDriveLetter, [string]$ErrorAction)
     }
+    function global:Format-Volume {
+        param([char]$DriveLetter, [string]$FileSystem, [switch]$Confirm, [string]$ErrorAction)
+    }
 }
 
 AfterAll {
@@ -120,6 +123,7 @@ Describe 'Initialize-StorageDisk' -Tag 'Unit' {
                 Mock Get-Disk { return $fakeDisk }
                 Mock Get-Partition { return @() }
                 Mock New-Partition { return $newPartition }
+                Mock Format-Volume
                 Mock Write-ToLog
 
                 $result = Initialize-StorageDisk -VirtualHardDisk ([PSCustomObject]@{})

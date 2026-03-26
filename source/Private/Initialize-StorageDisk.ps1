@@ -32,6 +32,9 @@ function Initialize-StorageDisk {
     if (-not $partition) {
         Write-ToLog -Message "Creating partition on disk $($disk.Number)." -Level INFO
         $partition = New-Partition -DiskNumber $disk.Number -UseMaximumSize -AssignDriveLetter -ErrorAction Stop
+
+        Write-ToLog -Message "Formatting partition on disk $($disk.Number) as NTFS." -Level INFO
+        Format-Volume -DriveLetter $partition.DriveLetter -FileSystem NTFS -Confirm:$false -ErrorAction Stop | Out-Null
     }
 
     return $partition.DriveLetter
