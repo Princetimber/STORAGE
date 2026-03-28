@@ -6,7 +6,20 @@
         "hooks": [
           {
             "type": "command",
-            "command": "pwsh -Command \"$files = git diff --name-only --diff-filter=AM -- '*.ps1' '*.psm1'; if ($files) { Invoke-ScriptAnalyzer -Path $files -Severity Warning,Error }\""
+            "command": "pwsh .claude/Invoke-ScriptAnalyzerOnChanged.ps1",
+            "statusMessage": "Running ScriptAnalyzer on modified PS files"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh .claude/Invoke-ScriptAnalyzerOnChanged.ps1",
+            "async": true,
+            "statusMessage": "Running ScriptAnalyzer on modified PS files"
           }
         ]
       }
