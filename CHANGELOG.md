@@ -5,8 +5,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.4] - 2026-09-18
+
 ### Fixed
 
+- `RequiredModules.psd1`: bracket-range values (e.g. `[3.0,4.0)`) need a leading `:` for
+  ModuleFast to parse them correctly — `Resolve-Dependency.ps1`'s ModuleFast branch
+  concatenates the module name directly with the value for range syntax, so without the
+  colon it produced malformed specs like `ModuleBuilder[3.0,4.0)` that failed to resolve
+  (the same bug exists upstream in `gaelcolas/Sampler`). Prefixed every range with `:`.
 - `RequiredModules.psd1`: the `Sampler.GitHubTasks` version range `[0.6,1.0)` did not match
   any version ever published to PSGallery (latest is 0.4.1), breaking the CI Build job on
   every run since March 2026. Relaxed to `[0.4,1.0)`.
@@ -46,6 +53,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Scoped the QA "Help for module" comment-based-help checks to exported (public) functions
   only, matching this project's documented convention that private functions use inline
   comments rather than full comment-based help.
+
+### Published
+
+- Patch release to PowerShell Gallery as `Invoke-Storage` v0.0.4.
 
 ## [0.0.2] - 2026-03-26
 

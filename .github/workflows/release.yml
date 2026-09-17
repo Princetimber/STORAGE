@@ -47,17 +47,11 @@ jobs:
           path: output/
 
   test:
-    name: Test (${{ matrix.os }})
+    # This module wraps Windows-only Storage Spaces cmdlets that do not exist on Linux/macOS.
+    name: Test (windows-latest)
     if: github.event_name == 'push'
     needs: build
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-latest
-          - windows-latest
-          - macos-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
         with:
