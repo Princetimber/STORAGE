@@ -5,6 +5,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `release.yml`: the Publish job ran `./build.ps1 -tasks publish`, but `build.yaml` only
+  defines a `publish_psgallery` workflow — there is no task literally named `publish`. This
+  aborted the `v0.0.4` release run with `Missing task 'publish'` before anything was pushed
+  to PSGallery.
+
 ## [0.0.4] - 2026-09-18
 
 ### Fixed
