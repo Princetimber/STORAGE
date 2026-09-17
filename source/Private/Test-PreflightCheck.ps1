@@ -33,7 +33,6 @@ function Test-PreflightCheck {
                     $errorMsg += "`n`n${tip} Tip: This module is designed for Windows Server installations only."
 
                     Write-ToLog -Message "Platform check failed: Windows Server not detected (ProductType: $($os.ProductType))." -Level ERROR
-                    $checksFailed++
                     throw $errorMsg
                 }
                 Write-ToLog -Message "Platform validation passed: Running on Windows Server." -Level INFO
