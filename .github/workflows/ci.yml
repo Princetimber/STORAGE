@@ -42,11 +42,16 @@ jobs:
           path: output/
 
   test:
-    name: Test (windows-latest)
+    name: Test (${{ matrix.os }})
     needs: build
-    # This module wraps Windows-only Storage Spaces cmdlets (Get-StoragePool,
-    # Get-VirtualDisk, Get-PhysicalDisk, etc.) which do not exist on Linux/macOS.
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -66,7 +71,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-windows-latest
+          name: test-results-${{ matrix.os }}
           path: output/testResults/
 
   lint:
