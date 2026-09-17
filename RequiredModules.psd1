@@ -18,5 +18,5 @@
     ModuleBuilder               = '[3.0,4.0)'
     ChangelogManagement         = '[3.0,4.0)'
     Sampler                     = '[0.118,1.0)'
-    'Sampler.GitHubTasks'       = '[0.6,1.0)'
+    'Sampler.GitHubTasks'       = '[0.4,1.0)'
 }

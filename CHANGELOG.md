@@ -5,6 +5,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `RequiredModules.psd1`: the `Sampler.GitHubTasks` version range `[0.6,1.0)` did not match
+  any version ever published to PSGallery (latest is 0.4.1), breaking the CI Build job on
+  every run since March 2026. Relaxed to `[0.4,1.0)`.
+
+### Changed
+
+- CI: restricted the `test` job to `windows-latest` only, since this module wraps Windows-only
+  Storage Spaces cmdlets that do not exist on Linux/macOS.
+
+### Known issues
+
+- Fixing the `Sampler.GitHubTasks` pin exposed a second, unrelated CI failure: PSDepend's
+  bootstrap phase fails on the `ubuntu-latest` Build job with
+  `Install-Package: Administrator rights are required to install or update`, independent of
+  this fix. Root cause and resolution are still being investigated — CI cannot currently
+  complete a Build on this repository even with this fix applied.
+
 ## [0.0.2] - 2026-03-26
 
 ### Fixed
