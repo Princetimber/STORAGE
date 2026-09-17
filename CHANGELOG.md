@@ -10,19 +10,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `RequiredModules.psd1`: the `Sampler.GitHubTasks` version range `[0.6,1.0)` did not match
   any version ever published to PSGallery (latest is 0.4.1), breaking the CI Build job on
   every run since March 2026. Relaxed to `[0.4,1.0)`.
+- CI Build job: the legacy PowerShellGet/PSDepend bootstrap path calls
+  `Install-PackageProvider -Scope CurrentUser` to install the NuGet provider, but on the
+  `ubuntu-latest` runner this still fails with
+  `Install-Package: Administrator rights are required to install or update`. Switched
+  dependency resolution to ModuleFast (`UseModuleFast = $true` in `Resolve-Dependency.psd1`),
+  which resolves and saves modules directly without requiring the NuGet provider or an
+  elevated PowerShellGet bootstrap.
+- `Test-PreflightCheck`: bare `return` inside `try` blocks exited the whole function on any
+  failed check, returning `$null` instead of the result hashtable. `Invoke-Storage`'s
+  `$preflight.EarlyExit` check then silently evaluated false, letting provisioning proceed
+  past a failed preflight gate (non-Windows, non-admin, no poolable disks).
+- `Test-PreflightCheck`: the "not Windows Server" branch incremented `$checksFailed` and then
+  threw into its own `catch` block, which incremented `$checksFailed` a second time for the
+  same failure.
+- `Add-StoragePool`: filter storage pools server-side via `-FriendlyName` instead of pulling
+  all pools and filtering with `Where-Object`; converted a backtick-continued `New-StoragePool`
+  call to a splat.
+- `New-Storage`: removed unreachable workload-profile validation (already guaranteed by
+  `ValidateSet`).
+- Fixed a filename typo: `Write-ErroLog.ps1` renamed to `Write-ErrorLog.ps1` to match its
+  function name, per the one-function-per-file convention.
+- Fixed a variable-scoping bug in `Write-ErrorLog` unit tests where a test-scope helper was
+  invoked from inside `InModuleScope` (module scope), causing 4 test failures.
 
 ### Changed
 
 - CI: restricted the `test` job to `windows-latest` only, since this module wraps Windows-only
   Storage Spaces cmdlets that do not exist on Linux/macOS.
-
-### Known issues
-
-- Fixing the `Sampler.GitHubTasks` pin exposed a second, unrelated CI failure: PSDepend's
-  bootstrap phase fails on the `ubuntu-latest` Build job with
-  `Install-Package: Administrator rights are required to install or update`, independent of
-  this fix. Root cause and resolution are still being investigated — CI cannot currently
-  complete a Build on this repository even with this fix applied.
+- Split `Copy-ItemWrapper`, `Clear-ContentWrapper`, `Move-ItemWrapper`, `Remove-ItemWrapper`,
+  `Initialize-LogFilePath`, `Test-PathWrapper`, `New-ItemDirectoryWrapper`, `Get-ItemWrapper`,
+  and `Add-ContentWrapper` out of their shared files into their own files, per the
+  one-function-per-file convention, and added unit tests for each.
+- Added a unit test file for `Test-PreflightCheck`.
+- Scoped the QA "Help for module" comment-based-help checks to exported (public) functions
+  only, matching this project's documented convention that private functions use inline
+  comments rather than full comment-based help.
 
 ## [0.0.2] - 2026-03-26
 

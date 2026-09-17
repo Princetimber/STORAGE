@@ -43,38 +43,3 @@ function Invoke-LogRotation {
         Write-Warning "Failed to rotate log file: $($_.Exception.Message)"
     }
 }
-
-# ============================================================================
-# WRAPPER FUNCTIONS FOR MOCKABILITY
-# ============================================================================
-
-# Wraps Move-Item for Pester mocking.
-function Move-ItemWrapper {
-    [CmdletBinding()]
-    [OutputType([void])]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '',
-        Justification = 'Wrapper function; ShouldProcess handled by calling function.')]
-    param(
-        [Parameter(Mandatory)]
-        [string]$LiteralPath,
-
-        [Parameter(Mandatory)]
-        [string]$Destination
-    )
-
-    Move-Item -LiteralPath $LiteralPath -Destination $Destination -Force -ErrorAction Stop
-}
-
-# Wraps Remove-Item for Pester mocking.
-function Remove-ItemWrapper {
-    [CmdletBinding()]
-    [OutputType([void])]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '',
-        Justification = 'Wrapper function; ShouldProcess handled by calling function.')]
-    param(
-        [Parameter(Mandatory)]
-        [string]$LiteralPath
-    )
-
-    Remove-Item -LiteralPath $LiteralPath -Force -ErrorAction Stop
-}

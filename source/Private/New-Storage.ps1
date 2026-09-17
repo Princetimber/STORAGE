@@ -112,10 +112,8 @@ function New-Storage {
         ) -Level WARN
     }
 
+    # $Workload is constrained by ValidateSet to keys that always exist in this map.
     $workloadProfile = $script:StorageWorkloadProfiles[$Workload]
-    if (-not $workloadProfile -and -not $script:StorageWorkloadProfiles.ContainsKey($Workload)) {
-        throw "No workload profile found for '$Workload'."
-    }
 
     if ($Remove.IsPresent) {
         Remove-Storage `

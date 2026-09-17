@@ -32,11 +32,9 @@ function Add-StoragePool {
     }
     process {
         try {
-            # Idempotency check — return the existing pool if it already exists
-            $pool = Get-StoragePool -ErrorAction SilentlyContinue | Where-Object {
-                $_.FriendlyName -eq $StoragePoolName -and
-                $_.StorageSubSystemFriendlyName -eq $StorageSubSystemFriendlyName
-            }
+            # Idempotency check — return the existing pool if it already exists (filtered server-side)
+            $pool = Get-StoragePool -FriendlyName $StoragePoolName -ErrorAction SilentlyContinue |
+                Where-Object StorageSubSystemFriendlyName -EQ $StorageSubSystemFriendlyName
 
             if ($pool) {
                 Write-ToLog -Message "Storage pool '$StoragePoolName' already exists. Reusing." -Level WARN
@@ -88,11 +86,13 @@ function Add-StoragePool {
             }
 
             if ($PSCmdlet.ShouldProcess($StoragePoolName, 'Create storage pool')) {
-                $pool = New-StoragePool `
-                    -FriendlyName                $StoragePoolName `
-                    -StorageSubSystemFriendlyName $StorageSubSystemFriendlyName `
-                    -PhysicalDisks               $PhysicalDisks `
-                    -ErrorAction Stop
+                $newPoolParams = @{
+                    FriendlyName                  = $StoragePoolName
+                    StorageSubSystemFriendlyName  = $StorageSubSystemFriendlyName
+                    PhysicalDisks                 = $PhysicalDisks
+                    ErrorAction                   = 'Stop'
+                }
+                $pool = New-StoragePool @newPoolParams
 
                 # Report capacity breakdown for operational awareness
                 $totalCapacity  = ($PhysicalDisks | Measure-Object -Property Size -Sum).Sum
