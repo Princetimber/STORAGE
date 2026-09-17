@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `RequiredModules.psd1`: the `Sampler.GitHubTasks` version range `[0.6,1.0)` did not match
+  any version ever published to PSGallery (latest is 0.4.1), breaking the CI Build job on
+  every run since March 2026. Relaxed to `[0.4,1.0)`.
+- CI Build job: the legacy PowerShellGet/PSDepend bootstrap path calls
+  `Install-PackageProvider -Scope CurrentUser` to install the NuGet provider, but on the
+  `ubuntu-latest` runner this still fails with
+  `Install-Package: Administrator rights are required to install or update`. Switched
+  dependency resolution to ModuleFast (`UseModuleFast = $true` in `Resolve-Dependency.psd1`),
+  which resolves and saves modules directly without requiring the NuGet provider or an
+  elevated PowerShellGet bootstrap.
 - `Test-PreflightCheck`: bare `return` inside `try` blocks exited the whole function on any
   failed check, returning `$null` instead of the result hashtable. `Invoke-Storage`'s
   `$preflight.EarlyExit` check then silently evaluated false, letting provisioning proceed
@@ -26,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- CI: restricted the `test` job to `windows-latest` only, since this module wraps Windows-only
+  Storage Spaces cmdlets that do not exist on Linux/macOS.
 - Split `Copy-ItemWrapper`, `Clear-ContentWrapper`, `Move-ItemWrapper`, `Remove-ItemWrapper`,
   `Initialize-LogFilePath`, `Test-PathWrapper`, `New-ItemDirectoryWrapper`, `Get-ItemWrapper`,
   and `Add-ContentWrapper` out of their shared files into their own files, per the
