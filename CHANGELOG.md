@@ -5,6 +5,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `Test-PreflightCheck`: bare `return` inside `try` blocks exited the whole function on any
+  failed check, returning `$null` instead of the result hashtable. `Invoke-Storage`'s
+  `$preflight.EarlyExit` check then silently evaluated false, letting provisioning proceed
+  past a failed preflight gate (non-Windows, non-admin, no poolable disks).
+- `Test-PreflightCheck`: the "not Windows Server" branch incremented `$checksFailed` and then
+  threw into its own `catch` block, which incremented `$checksFailed` a second time for the
+  same failure.
+- `Add-StoragePool`: filter storage pools server-side via `-FriendlyName` instead of pulling
+  all pools and filtering with `Where-Object`; converted a backtick-continued `New-StoragePool`
+  call to a splat.
+- `New-Storage`: removed unreachable workload-profile validation (already guaranteed by
+  `ValidateSet`).
+- Fixed a filename typo: `Write-ErroLog.ps1` renamed to `Write-ErrorLog.ps1` to match its
+  function name, per the one-function-per-file convention.
+- Fixed a variable-scoping bug in `Write-ErrorLog` unit tests where a test-scope helper was
+  invoked from inside `InModuleScope` (module scope), causing 4 test failures.
+
+### Changed
+
+- Split `Copy-ItemWrapper`, `Clear-ContentWrapper`, `Move-ItemWrapper`, `Remove-ItemWrapper`,
+  `Initialize-LogFilePath`, `Test-PathWrapper`, `New-ItemDirectoryWrapper`, `Get-ItemWrapper`,
+  and `Add-ContentWrapper` out of their shared files into their own files, per the
+  one-function-per-file convention, and added unit tests for each.
+- Added a unit test file for `Test-PreflightCheck`.
+- Scoped the QA "Help for module" comment-based-help checks to exported (public) functions
+  only, matching this project's documented convention that private functions use inline
+  comments rather than full comment-based help.
+
 ## [0.0.2] - 2026-03-26
 
 ### Fixed

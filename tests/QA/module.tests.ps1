@@ -167,7 +167,17 @@ Describe 'Quality for module' -Tags 'TestQuality' {
 }
 
 Describe 'Help for module' -Tags 'helpQuality' {
-    It 'Should have .SYNOPSIS for <Name>' -ForEach $testCases {
+    <#
+        Per this project's coding convention (see CLAUDE.md), full comment-based
+        help (SYNOPSIS/DESCRIPTION/EXAMPLE/parameter docs) is required only on
+        exported (public) functions. Private functions use inline comments
+        instead, so help-quality checks are scoped to the public API surface.
+    #>
+    BeforeDiscovery {
+        $publicTestCases = $testCases | Where-Object { $script:mut.ExportedFunctions.ContainsKey($_.Name) }
+    }
+
+    It 'Should have .SYNOPSIS for <Name>' -ForEach $publicTestCases {
         $functionFile = Get-ChildItem -Path $script:sourcePath -Recurse -Include "$Name.ps1"
 
         $scriptFileRawContent = Get-Content -Raw -Path $functionFile.FullName
@@ -186,7 +196,7 @@ Describe 'Help for module' -Tags 'helpQuality' {
         $functionHelp.Synopsis | Should -Not -BeNullOrEmpty
     }
 
-    It 'Should have a .DESCRIPTION with length greater than 40 characters for <Name>' -ForEach $testCases {
+    It 'Should have a .DESCRIPTION with length greater than 40 characters for <Name>' -ForEach $publicTestCases {
         $functionFile = Get-ChildItem -Path $script:sourcePath -Recurse -Include "$Name.ps1"
 
         $scriptFileRawContent = Get-Content -Raw -Path $functionFile.FullName
@@ -205,7 +215,7 @@ Describe 'Help for module' -Tags 'helpQuality' {
         $functionHelp.Description.Length | Should -BeGreaterThan 40
     }
 
-    It 'Should have at least one (1) example for <Name>' -ForEach $testCases {
+    It 'Should have at least one (1) example for <Name>' -ForEach $publicTestCases {
         $functionFile = Get-ChildItem -Path $script:sourcePath -Recurse -Include "$Name.ps1"
 
         $scriptFileRawContent = Get-Content -Raw -Path $functionFile.FullName
@@ -227,7 +237,7 @@ Describe 'Help for module' -Tags 'helpQuality' {
 
     }
 
-    It 'Should have described all parameters for <Name>' -ForEach $testCases {
+    It 'Should have described all parameters for <Name>' -ForEach $publicTestCases {
         $functionFile = Get-ChildItem -Path $script:sourcePath -Recurse -Include "$Name.ps1"
 
         $scriptFileRawContent = Get-Content -Raw -Path $functionFile.FullName
