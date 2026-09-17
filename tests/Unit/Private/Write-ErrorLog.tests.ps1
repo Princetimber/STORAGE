@@ -20,24 +20,16 @@ Describe 'Write-ErrorLog' -Tag 'Unit' {
         }
     }
 
-    # Helper: build a simple ErrorRecord
-    BeforeAll {
-        $script:BuildErrorRecord = {
-            param([string]$Message = 'Test error')
-            $exception = [System.Exception]::new($Message)
-            [System.Management.Automation.ErrorRecord]::new(
-                $exception, 'TestError',
-                [System.Management.Automation.ErrorCategory]::NotSpecified, $null
-            )
-        }
-    }
-
     Context 'When no custom message prefix is provided' {
         It 'Should delegate to Write-ToLog using the ErrorRecord parameter set' {
             InModuleScope -ModuleName $script:dscModuleName {
                 Mock Write-ToLog
 
-                $errorRecord = & $script:BuildErrorRecord 'Unhandled error'
+                $exception = [System.Exception]::new('Unhandled error')
+                $errorRecord = [System.Management.Automation.ErrorRecord]::new(
+                    $exception, 'TestError',
+                    [System.Management.Automation.ErrorCategory]::NotSpecified, $null
+                )
 
                 Write-ErrorLog -ErrorRecord $errorRecord
 
@@ -53,7 +45,11 @@ Describe 'Write-ErrorLog' -Tag 'Unit' {
             InModuleScope -ModuleName $script:dscModuleName {
                 Mock Write-ToLog
 
-                $errorRecord = & $script:BuildErrorRecord 'Connection refused'
+                $exception = [System.Exception]::new('Connection refused')
+                $errorRecord = [System.Management.Automation.ErrorRecord]::new(
+                    $exception, 'TestError',
+                    [System.Management.Automation.ErrorCategory]::NotSpecified, $null
+                )
 
                 Write-ErrorLog -ErrorRecord $errorRecord -Message 'Failed to connect:'
 
@@ -69,7 +65,11 @@ Describe 'Write-ErrorLog' -Tag 'Unit' {
             InModuleScope -ModuleName $script:dscModuleName {
                 Mock Write-ToLog
 
-                $errorRecord = & $script:BuildErrorRecord 'Some error'
+                $exception = [System.Exception]::new('Some error')
+                $errorRecord = [System.Management.Automation.ErrorRecord]::new(
+                    $exception, 'TestError',
+                    [System.Management.Automation.ErrorCategory]::NotSpecified, $null
+                )
 
                 Write-ErrorLog -ErrorRecord $errorRecord -Message 'Context:'
 
@@ -83,7 +83,11 @@ Describe 'Write-ErrorLog' -Tag 'Unit' {
             InModuleScope -ModuleName $script:dscModuleName {
                 Mock Write-ToLog
 
-                $errorRecord = & $script:BuildErrorRecord 'Some error'
+                $exception = [System.Exception]::new('Some error')
+                $errorRecord = [System.Management.Automation.ErrorRecord]::new(
+                    $exception, 'TestError',
+                    [System.Management.Automation.ErrorCategory]::NotSpecified, $null
+                )
 
                 Write-ErrorLog -ErrorRecord $errorRecord -Message 'Context:'
 
