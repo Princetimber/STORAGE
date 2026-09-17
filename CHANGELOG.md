@@ -5,14 +5,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.0.4] - 2026-09-18
+## [0.0.5] - 2026-09-18
 
 ### Fixed
 
+- `release.yml`: GitVersion cannot derive a version from a pushed release tag - on a tag
+  push the checkout is a detached HEAD with no branch GitVersion.yml's config can match,
+  and even a custom branch entry that does match still has GitVersion infer a version from
+  commit history rather than use the tag itself (confirmed locally: it returned `0.1.0`
+  with 26 commits since version source, not the tag's own version). Replaced GitVersion
+  with a direct `${GITHUB_REF_NAME#v}` derivation in both the Build and Publish jobs, since
+  the pushed tag (e.g. `v0.0.5`) already is the intended version.
 - `release.yml`: the Publish job ran `./build.ps1 -tasks publish`, but `build.yaml` only
   defines a `publish_psgallery` workflow — there is no task literally named `publish`. This
   aborted the first `v0.0.4` release run with `Missing task 'publish'` before anything was
   pushed to PSGallery.
+- The first `v0.0.4` release attempt (before the two fixes above) published an unintended
+  `0.1.0-tags` prerelease to PSGallery; it has been unlisted. `0.0.4` itself was never
+  published and is not reused as a version — this release ships as `0.0.5`.
 - `RequiredModules.psd1`: bracket-range values (e.g. `[3.0,4.0)`) need a leading `:` for
   ModuleFast to parse them correctly — `Resolve-Dependency.ps1`'s ModuleFast branch
   concatenates the module name directly with the value for range syntax, so without the
@@ -60,7 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Published
 
-- Patch release to PowerShell Gallery as `Invoke-Storage` v0.0.4.
+- Patch release to PowerShell Gallery as `Invoke-Storage` v0.0.5.
 
 ## [0.0.2] - 2026-03-26
 

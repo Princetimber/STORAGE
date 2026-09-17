@@ -25,20 +25,20 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v3.1.1
-        with:
-          versionSpec: '5.x'
-
-      - name: Determine Version
-        id: gitversion
-        uses: gittools/actions/gitversion/execute@v3.1.1
+      - name: Determine Version From Tag
+        # GitVersion infers versions from branch/commit history, which does not
+        # apply here: this workflow only runs on an exact 'vX.Y.Z' tag push, so
+        # the tag itself is the version - use it directly instead of asking
+        # GitVersion to (mis)infer one from a detached-HEAD tag checkout.
+        id: version
+        shell: bash
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
       - name: Build & Package Module
         shell: pwsh
         run: ./build.ps1 -ResolveDependency -tasks pack
         env:
-          ModuleVersion: ${{ steps.gitversion.outputs.nuGetVersionV2 }}
+          ModuleVersion: ${{ steps.version.outputs.version }}
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
@@ -83,10 +83,16 @@ jobs:
           name: module-output
           path: output/
 
+      - name: Determine Version From Tag
+        id: version
+        shell: bash
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
       - name: Publish to PSGallery
         shell: pwsh
         run: ./build.ps1 -tasks publish_psgallery
         env:
+          ModuleVersion: ${{ steps.version.outputs.version }}
           GitHubToken: ${{ secrets.GITHUB_TOKEN }}
           GalleryApiToken: ${{ secrets.PSGALLERY_API_KEY }}
           ReleaseBranch: main
