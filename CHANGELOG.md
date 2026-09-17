@@ -23,9 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   function name, per the one-function-per-file convention.
 - Fixed a variable-scoping bug in `Write-ErrorLog` unit tests where a test-scope helper was
   invoked from inside `InModuleScope` (module scope), causing 4 test failures.
-- Fixed `RequiredModules.psd1`: the `Sampler.GitHubTasks` version range `[0.6,1.0)` did not
-  match any version ever published to PSGallery (latest is 0.4.1), breaking the Build job in
-  CI on every run. Relaxed to `[0.4,1.0)`.
 
 ### Changed
 
@@ -37,8 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Scoped the QA "Help for module" comment-based-help checks to exported (public) functions
   only, matching this project's documented convention that private functions use inline
   comments rather than full comment-based help.
-- CI: restricted the `test` job to `windows-latest` only, since this module wraps Windows-only
-  Storage Spaces cmdlets that do not exist on Linux/macOS.
 
 ## [0.0.2] - 2026-03-26
 
